@@ -79,7 +79,10 @@ static void MX_USART1_UART_Init(void);
 
 	uint8_t counter = 0;
     int isDelaying = 0;
+    int score = 0;
 
+    char buffer[100] = {0};
+	char tBuff[20];
 
 
 
@@ -243,6 +246,8 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
+
+
 	  int GPIO_PinState = 0;//When you press the button, status is 0
 	  GPIO_PinState =  HAL_GPIO_ReadPin (Button_GPIO_Port, Button_Pin);
 	  if(GPIO_PinState==1){
@@ -250,6 +255,7 @@ int main(void)
 	  }
 	  else
 	  {
+
 		  if(HAL_GPIO_ReadPin (LED_GPIO_Port, LED_Pin)){
 			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
 			  if(BSP_QSPI_Read((uint8_t *)play, 0x01AEAA, 22050) != QSPI_OK){
@@ -257,6 +263,10 @@ int main(void)
 			  		  }
 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
 			  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+			  sprintf(tBuff, "Hit+1!  score:  %d \r", ++score);
+			  memset(buffer, 0, strlen(buffer));
+			  strcat(buffer, tBuff);
+			  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 			  isDelaying = 1;
 			  HAL_Delay(500);
 			  isDelaying = 0;
@@ -265,6 +275,11 @@ int main(void)
 			  					  Error_Handler();
 			  		}
 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
+		  }else{
+			 sprintf(tBuff, "Missed! score:  %d \r", score);
+			 memset(buffer, 0, strlen(buffer));
+			 strcat(buffer, tBuff);
+			 HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 		  }
 
 
