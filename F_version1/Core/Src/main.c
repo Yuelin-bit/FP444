@@ -248,8 +248,16 @@ int main(void)
 	  {
 		  if(HAL_GPIO_ReadPin (LED_GPIO_Port, LED_Pin)){
 			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+			  if(BSP_QSPI_Read((uint8_t *)play, 0x01AEAA, 22050) != QSPI_OK){
+			  			  Error_Handler();
+			  		  }
+			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
 			  HAL_Delay(500);
 			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+			  if(BSP_QSPI_Read((uint8_t *)play, 0x02AEAA, 22050) != QSPI_OK){
+			  					  Error_Handler();
+			  		}
+			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
 		  }
 
 
