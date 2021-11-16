@@ -72,7 +72,13 @@ static void MX_TIM2_Init(void);
 #define pi 3.14159265
 	uint8_t play[22050] = {0};
 
+	uint8_t empty[22050] = {0};
+
 	uint8_t counter = 0;
+
+
+
+
 
 //Tone 1 C6 1046.5 Hz
 	uint8_t C6[42];
@@ -483,16 +489,33 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 int lower = 1;
 int upper = 3;
+int DAC_status = 0;
+int LED_status2 = 0;
 void HAL_DAC_ConvCpltCallbackCh1 (DAC_HandleTypeDef * hdac){
 
-
+	if(DAC_status == 1){
+		if(BSP_QSPI_Read((uint8_t *)play, 0x02AEAA, 22050) != QSPI_OK){
+					  Error_Handler();
+		}
+		HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
+		DAC_status = 0;
+	}
 	int randomnumber = (rand() % (upper - lower + 1)) + lower;
 	if(randomnumber%3 == 0){
+		LED_status2 = (LED_status2 + 1) % 2;
 		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		if(LED_status2){
+			DAC_status = 1;
+			if(BSP_QSPI_Read((uint8_t *)play, 0x000000, 22050) != QSPI_OK){
+								  Error_Handler();
+			}
+			HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
+		}
+
 	}
 
 
-	if(counter == 0){
+	/*if(counter == 0){
 		if(BSP_QSPI_Read((uint8_t *)play, 0x000000, 22050) != QSPI_OK){
 			  Error_Handler();
 		  }
@@ -529,7 +552,7 @@ void HAL_DAC_ConvCpltCallbackCh1 (DAC_HandleTypeDef * hdac){
 		HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
 		counter=0;
 	}
-	counter++;
+	counter++;*/
 }
 
 
