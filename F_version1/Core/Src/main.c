@@ -232,6 +232,19 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+	  int GPIO_PinState = 0;//When you press the button, status is 0
+	  GPIO_PinState =  HAL_GPIO_ReadPin (Button_GPIO_Port, Button_Pin);
+	  if(GPIO_PinState==1){
+		  //HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+	  }
+	  else
+	  {
+		  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+
+	  }
+
+
   }
   /* USER CODE END 3 */
 }
@@ -453,9 +466,16 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+int lower = 1;
+int upper = 3;
 void HAL_DAC_ConvCpltCallbackCh1 (DAC_HandleTypeDef * hdac){
-	HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+
+
+	int randomnumber = (rand() % (upper - lower + 1)) + lower;
+	if(randomnumber%3 == 0){
+		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	}
+
 
 	if(counter == 0){
 		if(BSP_QSPI_Read((uint8_t *)play, 0x000000, 22050) != QSPI_OK){

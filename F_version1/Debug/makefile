@@ -61,8 +61,8 @@ all: main-build
 main-build: F_version1.elf secondary-outputs
 
 # Tool invocations
-F_version1.elf: $(OBJS) $(USER_OBJS) C:\Users\Sumail\FP444\F_version1\STM32L475VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "F_version1.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Sumail\FP444\F_version1\STM32L475VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="F_version1.map" -Wl,--gc-sections -static -L../Lib --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+F_version1.elf: $(OBJS) $(USER_OBJS) H:\ECSE444\FP444\F_version1\STM32L475VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "F_version1.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"H:\ECSE444\FP444\F_version1\STM32L475VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="F_version1.map" -Wl,--gc-sections -static -L../Lib --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
