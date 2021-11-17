@@ -79,6 +79,7 @@ static void MX_USART1_UART_Init(void);
 
 	uint8_t counter = 0;
     int isDelaying = 0;
+    int LED_status2 = 0;
     int score = 0;
 
     char buffer[100] = {0};
@@ -263,6 +264,7 @@ int main(void)
 			  		  }
 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
 			  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+			  LED_status2 = (LED_status2 + 1) % 2;
 			  sprintf(tBuff, "Hit+1!  score:  %d \r", ++score);
 			  memset(buffer, 0, strlen(buffer));
 			  strcat(buffer, tBuff);
@@ -276,6 +278,7 @@ int main(void)
 			  		}
 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
 		  }else{
+			 if(score > 0) score--;
 			 sprintf(tBuff, "Missed! score:  %d \r", score);
 			 memset(buffer, 0, strlen(buffer));
 			 strcat(buffer, tBuff);
@@ -555,7 +558,6 @@ static void MX_GPIO_Init(void)
 int lower = 1;
 int upper = 3;
 int DAC_status = 0;
-int LED_status2 = 0;
 void HAL_DAC_ConvCpltCallbackCh1 (DAC_HandleTypeDef * hdac){
 	if(isDelaying == 1) return;
 	if(DAC_status == 1){
