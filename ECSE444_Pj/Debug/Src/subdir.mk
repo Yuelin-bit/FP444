@@ -6,6 +6,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Src/main.c \
+../Src/stm32l475e_iot01_qspi.c \
 ../Src/stm32l4xx_hal_msp.c \
 ../Src/stm32l4xx_hal_timebase_tim.c \
 ../Src/stm32l4xx_it.c \
@@ -15,6 +16,7 @@ C_SRCS += \
 
 OBJS += \
 ./Src/main.o \
+./Src/stm32l475e_iot01_qspi.o \
 ./Src/stm32l4xx_hal_msp.o \
 ./Src/stm32l4xx_hal_timebase_tim.o \
 ./Src/stm32l4xx_it.o \
@@ -24,6 +26,7 @@ OBJS += \
 
 C_DEPS += \
 ./Src/main.d \
+./Src/stm32l475e_iot01_qspi.d \
 ./Src/stm32l4xx_hal_msp.d \
 ./Src/stm32l4xx_hal_timebase_tim.d \
 ./Src/stm32l4xx_it.d \

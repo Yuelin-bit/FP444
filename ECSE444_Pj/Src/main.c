@@ -19,7 +19,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include "arm_math.h"
+#include "stm32l475e_iot01_qspi.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -40,6 +41,11 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+DAC_HandleTypeDef hdac1;
+DMA_HandleTypeDef hdma_dac_ch1;
+
+QSPI_HandleTypeDef hqspi;
+
 TIM_HandleTypeDef htim2;
 
 UART_HandleTypeDef huart1;
@@ -53,14 +59,78 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART1_UART_Init(void);
+static void MX_DMA_Init(void);
+static void MX_DAC1_Init(void);
+static void MX_QUADSPI_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+#define pi 3.14159265
+uint8_t play[22050] = {0};
+uint8_t empty[22050] = {0};
+
+int DAC_status = 0;
+int isDelaying = 0;
+int LED_status2 = 0;
+int score = 0;
+
+
 char buffer[100] = {0};
 char tBuff[20];
+
+//Tone 1 C6 1046.5 Hz
+	uint8_t C6[42];
+void get_C6(){
+	for(int i = 0; i < 42; i++){
+		C6[i] =  0.33*(1 + arm_sin_f32(2*pi*i/42))*256;
+	}
+}
+
+//Tone 2 E6 1318.5 Hz
+	uint8_t E6[34];
+void get_E6(){
+	for(int i = 0; i < 34; i++){
+		E6[i] =  0.33*(1 + arm_sin_f32(2*pi*i/34))*256;
+	}
+}
+
+//Tone 3 G6 1568.0 Hz
+	uint8_t G6[28];
+void get_G6(){
+	for(int i = 0; i < 28; i++){
+		G6[i] =  0.33*(1 + arm_sin_f32(2*pi*i/28))*256;
+	}
+}
+
+//Tone 4 A6 1760.0 Hz
+
+	uint8_t A6[25];
+void get_A6(){
+	for(int i = 0; i < 25; i++){
+		A6[i] =  0.33*(1 + arm_sin_f32(2*pi*i/25))*256;
+	}
+}
+
+//Tone 5 B6 1975.53 Hz
+	uint8_t B6[22];
+void get_B6(){
+	for(int i = 0; i < 22; i++){
+		B6[i] =  0.33*(1 + arm_sin_f32(2*pi*i/22))*256;
+	}
+}
+
+//Tone 6 B5 987.78 Hz
+	uint8_t B5[45];
+void get_B5(){
+	for(int i = 0; i < 45; i++){
+		B5[i] =  0.33*(1 + arm_sin_f32(2*pi*i/45))*256;
+	}
+}
+
+
 void printWelcome(){
 	  sprintf(buffer, "       Welcome to our game! \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
@@ -122,8 +192,12 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM2_Init();
   MX_USART1_UART_Init();
+  MX_DMA_Init();
+  MX_DAC1_Init();
+  MX_QUADSPI_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim2);
+  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
   printWelcome();
   /* USER CODE END 2 */
 
@@ -212,6 +286,80 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief DAC1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_DAC1_Init(void)
+{
+
+  /* USER CODE BEGIN DAC1_Init 0 */
+
+  /* USER CODE END DAC1_Init 0 */
+
+  DAC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN DAC1_Init 1 */
+
+  /* USER CODE END DAC1_Init 1 */
+  /** DAC Initialization
+  */
+  hdac1.Instance = DAC1;
+  if (HAL_DAC_Init(&hdac1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** DAC channel OUT1 config
+  */
+  sConfig.DAC_SampleAndHold = DAC_SAMPLEANDHOLD_DISABLE;
+  sConfig.DAC_Trigger = DAC_TRIGGER_T2_TRGO;
+  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
+  sConfig.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_DISABLE;
+  sConfig.DAC_UserTrimming = DAC_TRIMMING_FACTORY;
+  if (HAL_DAC_ConfigChannel(&hdac1, &sConfig, DAC_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN DAC1_Init 2 */
+
+  /* USER CODE END DAC1_Init 2 */
+
+}
+
+/**
+  * @brief QUADSPI Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_QUADSPI_Init(void)
+{
+
+  /* USER CODE BEGIN QUADSPI_Init 0 */
+
+  /* USER CODE END QUADSPI_Init 0 */
+
+  /* USER CODE BEGIN QUADSPI_Init 1 */
+
+  /* USER CODE END QUADSPI_Init 1 */
+  /* QUADSPI parameter configuration*/
+  hqspi.Instance = QUADSPI;
+  hqspi.Init.ClockPrescaler = 255;
+  hqspi.Init.FifoThreshold = 1;
+  hqspi.Init.SampleShifting = QSPI_SAMPLE_SHIFTING_NONE;
+  hqspi.Init.FlashSize = 1;
+  hqspi.Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_1_CYCLE;
+  hqspi.Init.ClockMode = QSPI_CLOCK_MODE_0;
+  if (HAL_QSPI_Init(&hqspi) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN QUADSPI_Init 2 */
+
+  /* USER CODE END QUADSPI_Init 2 */
+
+}
+
+/**
   * @brief TIM2 Initialization Function
   * @param None
   * @retval None
@@ -292,6 +440,22 @@ static void MX_USART1_UART_Init(void)
 }
 
 /**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel3_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel3_IRQn);
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -342,12 +506,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(PB3_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PA4 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4;
-  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
   /*Configure GPIO pins : PB2_Pin PB1 PB4_Pin */
   GPIO_InitStruct.Pin = PB2_Pin|GPIO_PIN_1|PB4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
@@ -380,12 +538,32 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-/*void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
-	if(GPIO_Pin==COL1_Pin){
-		HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,GPIO_PIN_RESET);
-	}
-}*/
+int lower = 1;
+int upper = 3;
 
+void HAL_DAC_ConvCpltCallbackCh1 (DAC_HandleTypeDef * hdac){
+	if(isDelaying == 1) return;
+	if(DAC_status == 1){
+		if(BSP_QSPI_Read((uint8_t *)play, 0x02AEAA, 22050) != QSPI_OK){
+					  Error_Handler();
+		}
+		HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
+		DAC_status = 0;
+	}
+	int randomnumber = (rand() % (upper - lower + 1)) + lower;
+	if(randomnumber%3 == 0){
+		LED_status2 = (LED_status2 + 1) % 2;
+		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+		if(LED_status2){
+			DAC_status = 1;
+			if(BSP_QSPI_Read((uint8_t *)play, 0x000000, 22050) != QSPI_OK){
+								  Error_Handler();
+			}
+			HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
+		}
+
+	}
+}
 /* USER CODE END 4 */
 
 /**
