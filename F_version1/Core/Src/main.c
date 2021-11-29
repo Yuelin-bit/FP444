@@ -81,7 +81,7 @@ static void MX_USART1_UART_Init(void);
     int isDelaying = 0;
     int LED_status2 = 0;
     int score = 0;
-
+    int welcome = 0;
     char buffer[100] = {0};
 	char tBuff[20];
 
@@ -135,6 +135,37 @@ void get_B5(){
 		B5[i] =  0.33*(1 + arm_sin_f32(2*pi*i/45))*256;
 	}
 }
+
+void printWelcome(){
+	  sprintf(buffer, "       Welcome to our game! \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "------------------------------ \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|                             | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|                             | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|                             | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|                             | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "------------------------------ \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -184,6 +215,10 @@ int main(void)
   get_A6();
   get_B6();
   uint32_t addr = 0x000000;
+
+
+
+
   for(int i = 0; i < 3; i++){
 	  if(BSP_QSPI_Erase_Block(addr + i * 0x010000) != QSPI_OK){
 		  Error_Handler();
@@ -265,9 +300,14 @@ int main(void)
 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
 			  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 			  LED_status2 = (LED_status2 + 1) % 2;
+			  if(welcome==0){
+				  welcome = 1;
+				  printWelcome();
+			  }
 			  sprintf(tBuff, "Hit+1!  score:  %d \r", ++score);
 			  memset(buffer, 0, strlen(buffer));
 			  strcat(buffer, tBuff);
+			  memset(tBuff, 0, strlen(tBuff));
 			  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 			  isDelaying = 1;
 			  HAL_Delay(500);
@@ -278,11 +318,11 @@ int main(void)
 			  		}
 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
 		  }else{
-			 if(score > 0) score--;
+			 /*if(score > 0) score--;
 			 sprintf(tBuff, "Missed! score:  %d \r", score);
 			 memset(buffer, 0, strlen(buffer));
 			 strcat(buffer, tBuff);
-			 HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+			 HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);*/
 		  }
 
 
