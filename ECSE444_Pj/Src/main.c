@@ -71,11 +71,15 @@ static void MX_QUADSPI_Init(void);
 #define pi 3.14159265
 uint8_t play[22050] = {0};
 uint8_t empty[22050] = {0};
-
-int DAC_status = 0;
+int LED_0_status = 0;
+int LED_1_status = 0;
+int LED_2_status = 0;
+int LED_3_status = 0;
+int LED_4_status = 0;
+//int DAC_status = 0;
 int isDelaying = 0;
-int LED_status2 = 0;
-int score = 0;
+//int LED_status2 = 0;
+//int score = 0;
 
 
 char buffer[100] = {0};
@@ -208,7 +212,26 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  if(HAL_GPIO_ReadPin (BluePB_GPIO_Port, BluePB_Pin)==0){
+		  if(HAL_GPIO_ReadPin (LED_GPIO_Port, LED_Pin)){
+			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+			  /*if(BSP_QSPI_Read((uint8_t *)play, 0x01AEAA, 22050) != QSPI_OK){
+			  		Error_Handler();
+			  }
+			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);*/
+			  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+			  LED_0_status = 0;
+			  isDelaying = 1;
+			  HAL_Delay(500);
+			  isDelaying = 0;
+			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+			  /*if(BSP_QSPI_Read((uint8_t *)play, 0x02AEAA, 22050) != QSPI_OK){
+			  			Error_Handler();
+			  }
+			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);*/
 
+		  }
+	  }
 	  if( HAL_GPIO_ReadPin(PB1_GPIO_Port, PB1_Pin)==1){
 	 		  HAL_GPIO_WritePin(LED1_GPIO_Port,LED1_Pin,GPIO_PIN_SET);
 	 		  HAL_Delay(500);
@@ -230,7 +253,7 @@ int main(void)
 		 	 		 HAL_GPIO_WritePin(LED4_GPIO_Port,LED4_Pin,GPIO_PIN_RESET);
 	  }
 	  else{
-		  HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,GPIO_PIN_RESET);
+		  //HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,GPIO_PIN_RESET);
 
 	  }
   }
@@ -472,7 +495,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, LED4_Pin|LED1_Pin|LED2_Pin|LED3_Pin, GPIO_PIN_RESET);
@@ -540,28 +563,24 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 int lower = 1;
 int upper = 3;
-
+int DAC_status = 0;
 void HAL_DAC_ConvCpltCallbackCh1 (DAC_HandleTypeDef * hdac){
 	if(isDelaying == 1) return;
-	if(DAC_status == 1){
+	/*if(DAC_status == 1){
 		if(BSP_QSPI_Read((uint8_t *)play, 0x02AEAA, 22050) != QSPI_OK){
 					  Error_Handler();
 		}
 		HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
 		DAC_status = 0;
-	}
+	}*/
 	int randomnumber = (rand() % (upper - lower + 1)) + lower;
-	if(randomnumber%3 == 0){
-		LED_status2 = (LED_status2 + 1) % 2;
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		if(LED_status2){
-			DAC_status = 1;
-			if(BSP_QSPI_Read((uint8_t *)play, 0x000000, 22050) != QSPI_OK){
-								  Error_Handler();
-			}
-			HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
-		}
-
+	if(randomnumber%3 == 0 && LED_0_status ==0 ){
+		HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+		LED_0_status = 1;
+	}
+	else if(randomnumber%3 == 0 && LED_0_status ==1 ){
+			HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+			LED_0_status = 0;
 	}
 }
 /* USER CODE END 4 */
