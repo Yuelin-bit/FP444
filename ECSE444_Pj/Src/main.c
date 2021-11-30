@@ -19,12 +19,14 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include "cmsis_os.h"
 #define ARM_MATH_CM4
 #include "arm_math.h"
 #include "stm32l475e_iot01_qspi.h"
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,18 +53,22 @@ TIM_HandleTypeDef htim2;
 
 UART_HandleTypeDef huart1;
 
+osThreadId defaultTaskHandle;
 /* USER CODE BEGIN PV */
-
+osThreadId TransmitTaskHandle;
+void button_pressed_task(void);
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_TIM2_Init(void);
+static void MX_USART1_UART_Init(void);
 static void MX_DMA_Init(void);
 static void MX_DAC1_Init(void);
 static void MX_QUADSPI_Init(void);
-static void MX_TIM2_Init(void);
-static void MX_USART1_UART_Init(void);
+void StartDefaultTask(void const * argument);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -332,6 +338,39 @@ int main(void)
   printWelcome();
   /* USER CODE END 2 */
 
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* definition and creation of defaultTask */
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  osThreadDef(TransmitTask, button_pressed_task, osPriorityIdle, 0, 128);
+  TransmitTaskHandle = osThreadCreate(osThread(TransmitTask), NULL);
+  //osThreadDef(defaultTask, button_pressed_task, osPriorityNormal, 0, 128);
+  //defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+  /* USER CODE END RTOS_THREADS */
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -339,116 +378,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  if(HAL_GPIO_ReadPin (BluePB_GPIO_Port, BluePB_Pin)==0){
-		  if(HAL_GPIO_ReadPin (LED_GPIO_Port, LED_Pin)){
-			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
-			  if(BSP_QSPI_Read((uint8_t *)play, 0x01AEAA, 22050) != QSPI_OK){
-			  		Error_Handler();
-			  }
-			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
-			  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
-			  LED_0_status = 0;
-			  isDelaying = 1;
-			  HAL_Delay(200);
-			  isDelaying = 0;
-			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
-			  if(BSP_QSPI_Read((uint8_t *)play, 0x02AEAA, 22050) != QSPI_OK){
-			  			Error_Handler();
-			  }
-			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
-			  score = score+1;
-			  refreshAndPrint();
-		  }
-	  }
-	  if( HAL_GPIO_ReadPin(PB1_GPIO_Port, PB1_Pin)==1){
-		  if(HAL_GPIO_ReadPin (LED1_GPIO_Port, LED1_Pin)){
-			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
-			  if(BSP_QSPI_Read((uint8_t *)play, 0x000000, 22050) != QSPI_OK){
-				  Error_Handler();
-			  }
-		 	HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
-		 	HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
-		 	LED_1_status = 0;
-		 	isDelaying = 1;
-		 	HAL_Delay(200);
-		 	isDelaying = 0;
-		 	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
-			if(BSP_QSPI_Read((uint8_t *)play, 0x02AEAA, 22050) != QSPI_OK){
-					 Error_Handler();
-			}
-			HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
-			score = score+1;
-			refreshAndPrint();
-		  }
-	  }
-
-	  if( HAL_GPIO_ReadPin(PB2_GPIO_Port, PB2_Pin)==1){
-		  if(HAL_GPIO_ReadPin (LED2_GPIO_Port, LED2_Pin)){
-			  	  	  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
-					  if(BSP_QSPI_Read((uint8_t *)play, 0x005622, 22050) != QSPI_OK){
-						  Error_Handler();
-					  }
-				 	  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
-		 			  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
-		 			  LED_2_status = 0;
-		 			  isDelaying = 1;
-		 			  HAL_Delay(200);
-		 			  isDelaying = 0;
-		 			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
-		 			  if(BSP_QSPI_Read((uint8_t *)play, 0x02AEAA, 22050) != QSPI_OK){
-		 				  Error_Handler();
-		 			  }
-		 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
-		 			 score = score+1;
-		 			 refreshAndPrint();
-		  }
-	  }
-
-	  if( HAL_GPIO_ReadPin(PB3_GPIO_Port, PB3_Pin)==1){
-		  if(HAL_GPIO_ReadPin (LED3_GPIO_Port, LED3_Pin)){
-		 			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
-					  if(BSP_QSPI_Read((uint8_t *)play, 0x00AC44, 22050) != QSPI_OK){
-						  Error_Handler();
-					  }
-				 	  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
-		 			  HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
-		 			  LED_3_status = 0;
-		 			  isDelaying = 1;
-		 			  HAL_Delay(200);
-		 			  isDelaying = 0;
-		 			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
-		 			  if(BSP_QSPI_Read((uint8_t *)play, 0x02AEAA, 22050) != QSPI_OK){
-		 				  Error_Handler();
-		 			  }
-		 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
-		 			 score = score+1;
-		 			 refreshAndPrint();
-		  }
-	  }
-
-	  if( HAL_GPIO_ReadPin(PB4_GPIO_Port, PB4_Pin)==1){
-		  if(HAL_GPIO_ReadPin (LED4_GPIO_Port, LED4_Pin)){
-		 			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
-					  if(BSP_QSPI_Read((uint8_t *)play, 0x015888, 22050) != QSPI_OK){
-						  Error_Handler();
-					  }
-				 	  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
-		 			  HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
-		 			  LED_4_status = 0;
-		 			  isDelaying = 1;
-		 			  HAL_Delay(200);
-		 			  isDelaying = 0;
-		 			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
-		 			  if(BSP_QSPI_Read((uint8_t *)play, 0x02AEAA, 22050) != QSPI_OK){
-		 				  Error_Handler();
-		 			  }
-		 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
-		 			 refreshAndPrint();
-		 			score = score+1;
-		  }
-	  }
-
-
   }
   /* USER CODE END 3 */
 }
@@ -666,7 +595,7 @@ static void MX_DMA_Init(void)
 
   /* DMA interrupt init */
   /* DMA1_Channel3_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel3_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(DMA1_Channel3_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel3_IRQn);
 
 }
@@ -688,7 +617,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, LED4_Pin|LED1_Pin|LED2_Pin|LED3_Pin, GPIO_PIN_RESET);
@@ -748,12 +677,128 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(PB1_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 
 /* USER CODE BEGIN 4 */
+void button_pressed_task(void)
+{
+	  for(;;)
+	  {
+	    osDelay(100);
+	if(HAL_GPIO_ReadPin (BluePB_GPIO_Port, BluePB_Pin)==0){
+			  if(HAL_GPIO_ReadPin (LED_GPIO_Port, LED_Pin)){
+				  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+				  if(BSP_QSPI_Read((uint8_t *)play, 0x01AEAA, 22050) != QSPI_OK){
+				  		Error_Handler();
+				  }
+				  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
+				  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+				  LED_0_status = 0;
+				  isDelaying = 1;
+				  HAL_Delay(200);
+				  isDelaying = 0;
+				  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+				  if(BSP_QSPI_Read((uint8_t *)play, 0x02AEAA, 22050) != QSPI_OK){
+				  			Error_Handler();
+				  }
+				  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
+				  score = score+1;
+				  refreshAndPrint();
+			  }
+		  }
+		  if( HAL_GPIO_ReadPin(PB1_GPIO_Port, PB1_Pin)==1){
+			  if(HAL_GPIO_ReadPin (LED1_GPIO_Port, LED1_Pin)){
+				  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+				  if(BSP_QSPI_Read((uint8_t *)play, 0x000000, 22050) != QSPI_OK){
+					  Error_Handler();
+				  }
+			 	HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
+			 	HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+			 	LED_1_status = 0;
+			 	isDelaying = 1;
+			 	HAL_Delay(200);
+			 	isDelaying = 0;
+			 	HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+				if(BSP_QSPI_Read((uint8_t *)play, 0x02AEAA, 22050) != QSPI_OK){
+						 Error_Handler();
+				}
+				HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
+				score = score+1;
+				refreshAndPrint();
+			  }
+		  }
+
+		  if( HAL_GPIO_ReadPin(PB2_GPIO_Port, PB2_Pin)==1){
+			  if(HAL_GPIO_ReadPin (LED2_GPIO_Port, LED2_Pin)){
+				  	  	  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+						  if(BSP_QSPI_Read((uint8_t *)play, 0x005622, 22050) != QSPI_OK){
+							  Error_Handler();
+						  }
+					 	  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
+			 			  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+			 			  LED_2_status = 0;
+			 			  isDelaying = 1;
+			 			  HAL_Delay(200);
+			 			  isDelaying = 0;
+			 			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+			 			  if(BSP_QSPI_Read((uint8_t *)play, 0x02AEAA, 22050) != QSPI_OK){
+			 				  Error_Handler();
+			 			  }
+			 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
+			 			 score = score+1;
+			 			 refreshAndPrint();
+			  }
+		  }
+
+		  if( HAL_GPIO_ReadPin(PB3_GPIO_Port, PB3_Pin)==1){
+			  if(HAL_GPIO_ReadPin (LED3_GPIO_Port, LED3_Pin)){
+			 			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+						  if(BSP_QSPI_Read((uint8_t *)play, 0x00AC44, 22050) != QSPI_OK){
+							  Error_Handler();
+						  }
+					 	  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
+			 			  HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
+			 			  LED_3_status = 0;
+			 			  isDelaying = 1;
+			 			  HAL_Delay(200);
+			 			  isDelaying = 0;
+			 			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+			 			  if(BSP_QSPI_Read((uint8_t *)play, 0x02AEAA, 22050) != QSPI_OK){
+			 				  Error_Handler();
+			 			  }
+			 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
+			 			 score = score+1;
+			 			 refreshAndPrint();
+			  }
+		  }
+
+		  if( HAL_GPIO_ReadPin(PB4_GPIO_Port, PB4_Pin)==1){
+			  if(HAL_GPIO_ReadPin (LED4_GPIO_Port, LED4_Pin)){
+			 			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+						  if(BSP_QSPI_Read((uint8_t *)play, 0x015888, 22050) != QSPI_OK){
+							  Error_Handler();
+						  }
+					 	  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
+			 			  HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
+			 			  LED_4_status = 0;
+			 			  isDelaying = 1;
+			 			  HAL_Delay(200);
+			 			  isDelaying = 0;
+			 			  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
+			 			  if(BSP_QSPI_Read((uint8_t *)play, 0x02AEAA, 22050) != QSPI_OK){
+			 				  Error_Handler();
+			 			  }
+			 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
+			 			 refreshAndPrint();
+			 			score = score+1;
+			  }
+		  }
+	  }
+}
+
 int lower = 1;
 int upper = 3;
 int DAC_status = 0;
@@ -819,6 +864,24 @@ void HAL_DAC_ConvCpltCallbackCh1 (DAC_HandleTypeDef * hdac){
 	refreshAndPrint();
 }
 /* USER CODE END 4 */
+
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
+void StartDefaultTask(void const * argument)
+{
+  /* USER CODE BEGIN 5 */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END 5 */
+}
 
 /**
   * @brief  Period elapsed callback in non blocking mode
