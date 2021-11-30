@@ -62,7 +62,7 @@ main-build: ECSE444_Pj.elf secondary-outputs
 
 # Tool invocations
 ECSE444_Pj.elf: $(OBJS) $(USER_OBJS) H:\ECSE444\FP444\ECSE444_Pj\STM32L475VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "ECSE444_Pj.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"H:\ECSE444\FP444\ECSE444_Pj\STM32L475VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="ECSE444_Pj.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "ECSE444_Pj.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"H:\ECSE444\FP444\ECSE444_Pj\STM32L475VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="ECSE444_Pj.map" -Wl,--gc-sections -static -L../Lib --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
