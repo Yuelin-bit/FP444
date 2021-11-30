@@ -56,7 +56,9 @@ UART_HandleTypeDef huart1;
 osThreadId defaultTaskHandle;
 /* USER CODE BEGIN PV */
 osThreadId TransmitTaskHandle;
+osThreadId SystemControllerHandle;
 void button_pressed_task(void);
+void control(void);
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -85,7 +87,7 @@ int LED_3_status = 0;
 int LED_4_status = 0;
 //int DAC_status = 0;
 int isDelaying = 0;
-//int LED_status2 = 0;
+int isPause = 0;
 int score = 0;
 
 
@@ -169,6 +171,44 @@ void printWelcome(){
 	  memset(buffer, 0, strlen(buffer));
 
 	  sprintf(buffer, "|                                  | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|                                  | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "------------------------------------ \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+}
+
+void printPause(){
+	  sprintf(buffer, "         Welcome to our game! \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "------------------------------------ \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|                                  | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|                                  | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|   The game is paused currently.  | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|                                  | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|  Press blue button to continue.  | \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
@@ -361,8 +401,13 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+  osThreadDef(SystemController, control, osPriorityHigh, 0, 128);
+  SystemControllerHandle = osThreadCreate(osThread(SystemController), NULL);
+
   osThreadDef(TransmitTask, button_pressed_task, osPriorityIdle, 0, 128);
   TransmitTaskHandle = osThreadCreate(osThread(TransmitTask), NULL);
+
+
   //osThreadDef(defaultTask, button_pressed_task, osPriorityNormal, 0, 128);
   //defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
   /* USER CODE END RTOS_THREADS */
@@ -683,13 +728,36 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void control(void){
+	for(;;){
+		osDelay(100);
+		if(HAL_GPIO_ReadPin (BluePB_GPIO_Port, BluePB_Pin)==0){
+			if(isPause==0){
+				isDelaying = 1;
+				osThreadSuspend(TransmitTaskHandle);
+				osThreadSuspend(defaultTaskHandle);
+				isPause = 1;
+				printPause();
+				HAL_Delay(500);
+			}
+			else if(isPause==1){
+				isDelaying = 0;
+				osThreadResume(TransmitTaskHandle);
+				osThreadResume(defaultTaskHandle);
+				isPause = 0;
+				HAL_Delay(500);
+			}
+		}
+	}
+}
 void button_pressed_task(void)
 {
 	  for(;;)
 	  {
 	    osDelay(100);
 	if(HAL_GPIO_ReadPin (BluePB_GPIO_Port, BluePB_Pin)==0){
-			  if(HAL_GPIO_ReadPin (LED_GPIO_Port, LED_Pin)){
+		//osThreadSuspend(TransmitTaskHandle);
+			  /*if(HAL_GPIO_ReadPin (LED_GPIO_Port, LED_Pin)){
 				  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
 				  if(BSP_QSPI_Read((uint8_t *)play, 0x01AEAA, 22050) != QSPI_OK){
 				  		Error_Handler();
@@ -707,7 +775,8 @@ void button_pressed_task(void)
 				  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
 				  score = score+1;
 				  refreshAndPrint();
-			  }
+				  TransmitTaskHandle->
+			  }*/
 		  }
 		  if( HAL_GPIO_ReadPin(PB1_GPIO_Port, PB1_Pin)==1){
 			  if(HAL_GPIO_ReadPin (LED1_GPIO_Port, LED1_Pin)){
