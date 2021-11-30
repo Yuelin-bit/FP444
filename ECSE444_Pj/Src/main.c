@@ -84,7 +84,8 @@ int isDelaying = 0;
 
 
 char buffer[100] = {0};
-char tBuff[20];
+char tBuff0[20];
+char tBuff1[20];
 
 //Tone 1 C6 1046.5 Hz
 	uint8_t C6[42];
@@ -141,35 +142,93 @@ void printWelcome(){
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
-	  sprintf(buffer, "------------------------------------- \r \n");
+	  sprintf(buffer, "------------------------------------ \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
-	  sprintf(buffer, "|                                   | \r \n");
+	  sprintf(buffer, "|                                  | \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
-	  sprintf(buffer, "|   ____    ____     ____     ____  | \r \n");
+	  sprintf(buffer, "|   ____    ____    ____    ____   | \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
-	  sprintf(buffer, "|  |    |  |    |   |    |   |    | | \r \n");
+	  sprintf(buffer, "|  |    |  |    |  |    |  |    |  | \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
-	  sprintf(buffer, "|  |    |  |    |   |    |   |    | | \r \n");
+	  sprintf(buffer, "|  |    |  |    |  |    |  |    |  | \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
-	  sprintf(buffer, "|                                   | \r \n");
+	  sprintf(buffer, "|                                  | \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
-	  sprintf(buffer, "|                                   | \r \n");
+	  sprintf(buffer, "|                                  | \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
-	  sprintf(buffer, "------------------------------------- \r \n");
+	  sprintf(buffer, "------------------------------------ \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+}
+
+void refreshAndPrint(){
+
+	 sprintf(buffer, "\033[2J\033[9A");
+	 HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	 memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "         Welcome to our game!! \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "------------------------------------ \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|                                  | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|   ____    ____    ____    ____   | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  //if(LED_1_status = 0 && LED_2_status = 0 && LED_3_status = 0 && LED_4_status = 0)
+	  sprintf(tBuff0, " |    | ");
+	  sprintf(tBuff1, " | aa | ");
+	  sprintf(buffer, "| ");
+
+	  if(LED_1_status == 1) strcat(buffer, tBuff1);
+	  else strcat(buffer, tBuff0);
+	  if(LED_2_status == 1) strcat(buffer, tBuff1);
+	  else strcat(buffer, tBuff0);
+	  if(LED_3_status == 1) strcat(buffer, tBuff1);
+	  else strcat(buffer, tBuff0);
+	  if(LED_4_status == 1) strcat(buffer, tBuff1);
+	  else strcat(buffer, tBuff0);
+
+	  strcat(buffer, " | \r \n");
+
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  //sprintf(buffer, "|  |    |  |    |  |    |  |    |  | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|  |    |  |    |  |    |  |    |  | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|                                  | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "------------------------------------ \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 }
@@ -296,7 +355,7 @@ int main(void)
 			  			Error_Handler();
 			  }
 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
-
+			  refreshAndPrint();
 		  }
 	  }
 	  if( HAL_GPIO_ReadPin(PB1_GPIO_Port, PB1_Pin)==1){
@@ -316,6 +375,7 @@ int main(void)
 					 Error_Handler();
 			}
 			HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
+			refreshAndPrint();
 		  }
 	  }
 
@@ -336,6 +396,7 @@ int main(void)
 		 				  Error_Handler();
 		 			  }
 		 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
+		 			 refreshAndPrint();
 		  }
 	  }
 
@@ -356,6 +417,7 @@ int main(void)
 		 				  Error_Handler();
 		 			  }
 		 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
+		 			 refreshAndPrint();
 		  }
 	  }
 
@@ -376,6 +438,7 @@ int main(void)
 		 				  Error_Handler();
 		 			  }
 		 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
+		 			 refreshAndPrint();
 		  }
 	  }
 
@@ -747,7 +810,7 @@ void HAL_DAC_ConvCpltCallbackCh1 (DAC_HandleTypeDef * hdac){
 			HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
 			LED_4_status = 0;
 	}
-
+	refreshAndPrint();
 }
 /* USER CODE END 4 */
 
