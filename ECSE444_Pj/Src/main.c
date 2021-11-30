@@ -184,15 +184,16 @@ void printWelcome(){
 }
 
 void printPause(){
+
+	 sprintf(buffer, "\033[2J\033[9A");
+	 HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	 memset(buffer, 0, strlen(buffer));
+
 	  sprintf(buffer, "         Welcome to our game! \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
 	  sprintf(buffer, "------------------------------------ \r \n");
-	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
-	  memset(buffer, 0, strlen(buffer));
-
-	  sprintf(buffer, "|                                  | \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
