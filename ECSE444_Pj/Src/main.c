@@ -80,7 +80,7 @@ int LED_4_status = 0;
 //int DAC_status = 0;
 int isDelaying = 0;
 //int LED_status2 = 0;
-//int score = 0;
+int score = 0;
 
 
 char buffer[100] = {0};
@@ -189,7 +189,8 @@ void refreshAndPrint(){
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
-	  sprintf(buffer, "|                                  | \r \n");
+	  if(score < 10) sprintf(buffer, "|Score: %d                          | \r \n",score);
+	  else sprintf(buffer, "|Score: %d                         | \r \n",score);
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
@@ -355,6 +356,7 @@ int main(void)
 			  			Error_Handler();
 			  }
 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
+			  score = score+1;
 			  refreshAndPrint();
 		  }
 	  }
@@ -375,6 +377,7 @@ int main(void)
 					 Error_Handler();
 			}
 			HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
+			score = score+1;
 			refreshAndPrint();
 		  }
 	  }
@@ -396,6 +399,7 @@ int main(void)
 		 				  Error_Handler();
 		 			  }
 		 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
+		 			 score = score+1;
 		 			 refreshAndPrint();
 		  }
 	  }
@@ -417,6 +421,7 @@ int main(void)
 		 				  Error_Handler();
 		 			  }
 		 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
+		 			 score = score+1;
 		 			 refreshAndPrint();
 		  }
 	  }
@@ -439,6 +444,7 @@ int main(void)
 		 			  }
 		 			  HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, empty, 22050, DAC_ALIGN_8B_R);
 		 			 refreshAndPrint();
+		 			score = score+1;
 		  }
 	  }
 
