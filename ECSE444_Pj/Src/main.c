@@ -86,9 +86,11 @@ int LED_2_status = 0;
 int LED_3_status = 0;
 int LED_4_status = 0;
 //int DAC_status = 0;
-int isDelaying = 0;
+int isDelaying = 1;//Control DAC
+int isStop = 1;
 int isPause = 0;
 int score = 0;
+int time_counter = 0;
 
 
 char buffer[100] = {0};
@@ -146,6 +148,11 @@ void get_B5(){
 
 
 void printWelcome(){
+
+	 sprintf(buffer, "\033[9A");
+	 HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	 memset(buffer, 0, strlen(buffer));
+
 	  sprintf(buffer, "         Welcome to our game! \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
@@ -158,19 +165,97 @@ void printWelcome(){
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
-	  sprintf(buffer, "|   ____    ____    ____    ____   | \r \n");
+	  sprintf(buffer, "|       Press blue button          | \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
-	  sprintf(buffer, "|  |    |  |    |  |    |  |    |  | \r \n");
-	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
-	  memset(buffer, 0, strlen(buffer));
-
-	  sprintf(buffer, "|  |    |  |    |  |    |  |    |  | \r \n");
+	  sprintf(buffer, "|        to get started!           | \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
 	  sprintf(buffer, "|                                  | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|                                  | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "------------------------------------ \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+		 sprintf(buffer, "\033[9A");
+		 HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+		 memset(buffer, 0, strlen(buffer));
+}
+
+void printFailed(){
+
+	 sprintf(buffer, "\033[2J\033[9A");
+	 HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	 memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "           You Failed !!!            \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "------------------------------------ \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|                                  | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|           Time is up!            | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|          Your score is %d .       | \r \n",score);
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|  Press blue button to continue.  | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|                                  | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "------------------------------------ \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+}
+
+void printSuccess(){
+
+	 sprintf(buffer, "\033[2J\033[9A");
+	 HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	 memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "              You Won !!!            \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "------------------------------------ \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|                                  | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|        Congratuations!           | \r \n");
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|          Your score is %d .       | \r \n",score);
+	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
+	  memset(buffer, 0, strlen(buffer));
+
+	  sprintf(buffer, "|  Press blue button to continue.  | \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
@@ -189,7 +274,7 @@ void printPause(){
 	 HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	 memset(buffer, 0, strlen(buffer));
 
-	  sprintf(buffer, "         Welcome to our game! \r \n");
+	  sprintf(buffer, "         Whac The Mole!!!            \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
@@ -228,7 +313,7 @@ void refreshAndPrint(){
 	 HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	 memset(buffer, 0, strlen(buffer));
 
-	  sprintf(buffer, "         Welcome to our game!! \r \n");
+	  sprintf(buffer, "         Whac The Mole!!!            \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
@@ -236,8 +321,22 @@ void refreshAndPrint(){
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
-	  if(score < 10) sprintf(buffer, "|Score: %d                          | \r \n",score);
-	  else sprintf(buffer, "|Score: %d                         | \r \n",score);
+	  if(score < 10){
+		  if(score,time_counter<10){
+			  sprintf(buffer, "|Score: %d                Time: %d   | \r \n",score,time_counter);
+		  }
+		  else{
+			  sprintf(buffer, "|Score: %d                Time: %d  | \r \n",score,time_counter);
+		  }
+	  }else{
+		  if(score,time_counter<10){
+			  sprintf(buffer, "|Score: %d               Time: %d   | \r \n",score,time_counter);
+		  }
+		  else{
+			  sprintf(buffer, "|Score: %d               Time: %d  | \r \n",score,time_counter);
+		  }
+	  }
+
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
@@ -279,6 +378,7 @@ void refreshAndPrint(){
 	  sprintf(buffer, "------------------------------------ \r \n");
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
+
 }
 /* USER CODE END 0 */
 
@@ -732,21 +832,48 @@ static void MX_GPIO_Init(void)
 void control(void){
 	for(;;){
 		osDelay(100);
-		if(HAL_GPIO_ReadPin (BluePB_GPIO_Port, BluePB_Pin)==0){
-			if(isPause==0){
+		if(time_counter == 30){
+			if(score >= 2){
+				isStop = 1;
 				isDelaying = 1;
-				osThreadSuspend(TransmitTaskHandle);
-				osThreadSuspend(defaultTaskHandle);
 				isPause = 1;
-				printPause();
+				printSuccess();
+				HAL_Delay(500);
+				time_counter = 0;
+			}
+			else{
+				isStop = 1;
+				isDelaying = 1;
+				isPause = 1;
+				printFailed();
+				HAL_Delay(500);
+				time_counter = 0;
+			}
+		}
+		if(HAL_GPIO_ReadPin (BluePB_GPIO_Port, BluePB_Pin)==0){
+			if(isStop==1){
+				score = 0;
+				isStop = 0;
+				isPause = 0;
+				isDelaying = 0;
 				HAL_Delay(500);
 			}
-			else if(isPause==1){
-				isDelaying = 0;
-				osThreadResume(TransmitTaskHandle);
-				osThreadResume(defaultTaskHandle);
-				isPause = 0;
-				HAL_Delay(500);
+			else{
+				if(isPause==0){
+								isDelaying = 1;
+								osThreadSuspend(TransmitTaskHandle);
+								osThreadSuspend(defaultTaskHandle);
+								isPause = 1;
+								printPause();
+								HAL_Delay(500);
+							}
+				else if(isPause==1){
+					isDelaying = 0;
+					osThreadResume(TransmitTaskHandle);
+					osThreadResume(defaultTaskHandle);
+					isPause = 0;
+					HAL_Delay(500);
+				}
 			}
 		}
 	}
@@ -799,6 +926,7 @@ void button_pressed_task(void)
 				score = score+1;
 				refreshAndPrint();
 			  }
+			  else score = score - 1;
 		  }
 
 		  if( HAL_GPIO_ReadPin(PB2_GPIO_Port, PB2_Pin)==1){
@@ -821,6 +949,7 @@ void button_pressed_task(void)
 			 			 score = score+1;
 			 			 refreshAndPrint();
 			  }
+			  else score = score - 1;
 		  }
 
 		  if( HAL_GPIO_ReadPin(PB3_GPIO_Port, PB3_Pin)==1){
@@ -843,6 +972,7 @@ void button_pressed_task(void)
 			 			 score = score+1;
 			 			 refreshAndPrint();
 			  }
+			  else score = score - 1;
 		  }
 
 		  if( HAL_GPIO_ReadPin(PB4_GPIO_Port, PB4_Pin)==1){
@@ -865,6 +995,7 @@ void button_pressed_task(void)
 			 			 refreshAndPrint();
 			 			score = score+1;
 			  }
+			  else score = score - 1;
 		  }
 	  }
 }
@@ -872,8 +1003,10 @@ void button_pressed_task(void)
 int lower = 1;
 int upper = 3;
 int DAC_status = 0;
+
 void HAL_DAC_ConvCpltCallbackCh1 (DAC_HandleTypeDef * hdac){
 	if(isDelaying == 1) return;
+	time_counter  = time_counter + 1;
 	/*if(DAC_status == 1){
 		if(BSP_QSPI_Read((uint8_t *)play, 0x02AEAA, 22050) != QSPI_OK){
 					  Error_Handler();
