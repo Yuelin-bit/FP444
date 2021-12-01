@@ -91,6 +91,7 @@ int isStop = 1;
 int isPause = 0;
 int score = 0;
 int time_counter = 0;
+int difficulty = 6;
 
 
 char buffer[100] = {0};
@@ -177,7 +178,7 @@ void printWelcome(){
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
-	  sprintf(buffer, "|                                  | \r \n");
+	  sprintf(buffer, "|      Difficulty is %d 	    | \r \n",difficulty);
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
@@ -220,7 +221,7 @@ void printFailed(){
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
-	  sprintf(buffer, "|                                  | \r \n");
+	  sprintf(buffer, "|      Difficulty is %d 	    | \r \n",difficulty);
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
@@ -259,7 +260,7 @@ void printSuccess(){
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
-	  sprintf(buffer, "|                                  | \r \n");
+	  sprintf(buffer, "|      Difficulty is %d 	    | \r \n",difficulty);
 	  HAL_UART_Transmit(&huart1, (uint8_t *) buffer, (uint16_t) strlen(buffer), 30000);
 	  memset(buffer, 0, strlen(buffer));
 
@@ -832,8 +833,8 @@ static void MX_GPIO_Init(void)
 void control(void){
 	for(;;){
 		osDelay(100);
-		if(time_counter == 30){
-			if(score >= 2){
+		if(time_counter == 60){
+			if(score >= difficulty){
 				isStop = 1;
 				isDelaying = 1;
 				isPause = 1;
@@ -874,6 +875,22 @@ void control(void){
 					isPause = 0;
 					HAL_Delay(500);
 				}
+			}
+		}
+		if( HAL_GPIO_ReadPin(PB2_GPIO_Port, PB2_Pin)==1){
+			if(isStop==1){
+				difficulty = difficulty + 1;
+				if(difficulty>=20) difficulty = 12;
+				printWelcome();
+				HAL_Delay(500);
+			}
+		}
+		if( HAL_GPIO_ReadPin(PB1_GPIO_Port, PB1_Pin)==1){
+			if(isStop==1){
+				difficulty = difficulty - 1;
+				if(difficulty<=2) difficulty = 2;
+				printWelcome();
+				HAL_Delay(500);
 			}
 		}
 	}
