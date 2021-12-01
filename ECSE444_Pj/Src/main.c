@@ -433,6 +433,8 @@ int main(void)
   }
 
   uint32_t tone_addr = 0x000000;
+  uint32_t music_addr = 0x030000;
+  uint32_t music2_addr = 0x050000;
   for(int i = 0; i < 490; i++){
 	  if(BSP_QSPI_Write((uint8_t *)B5, tone_addr, 45) != QSPI_OK){
 		  Error_Handler();
@@ -471,9 +473,135 @@ int main(void)
 	  }
 	  tone_addr += 22;
   }
+////////////////////////
+  //////////////
+  ///////////
+  for(int i = 0; i < 78; i++){
+	  if(BSP_QSPI_Write((uint8_t *)G6, music_addr, 28) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music_addr += 28;
+  }
+  for(int i = 0; i < 88; i++){
+	  if(BSP_QSPI_Write((uint8_t *)A6, music_addr, 25) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music_addr += 25;
+  }
+  for(int i = 0; i < 49; i++){
+	  if(BSP_QSPI_Write((uint8_t *)B5, music_addr, 45) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music_addr += 45;
+  }
+  for(int i = 0; i < 49; i++){
+	  if(BSP_QSPI_Write((uint8_t *)B5, music_addr, 45) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music_addr += 45;
+  }
+  for(int i = 0; i < 52; i++){//22050 = 5*4096+6*256+2*16+2 = 0x005622;
+	  if(BSP_QSPI_Write((uint8_t *)C6, music_addr, 42) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music_addr += 42;
+  }
+  for(int i = 0; i < 52; i++){//22050 = 5*4096+6*256+2*16+2 = 0x005622;
+	  if(BSP_QSPI_Write((uint8_t *)C6, music_addr, 42) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music_addr += 42;
+  }
+  for(int i = 0; i < 49; i++){
+	  if(BSP_QSPI_Write((uint8_t *)B5, music_addr, 45) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music_addr += 45;
+  }
+  for(int i = 0; i < 49; i++){
+	  if(BSP_QSPI_Write((uint8_t *)B5, music_addr, 45) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music_addr += 45;
+  }
+  for(int i = 0; i < 52; i++){//22050 = 5*4096+6*256+2*16+2 = 0x005622;
+	  if(BSP_QSPI_Write((uint8_t *)C6, music_addr, 42) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music_addr += 42;
+  }
+  for(int i = 0; i < 52; i++){//22050 = 5*4096+6*256+2*16+2 = 0x005622;
+	  if(BSP_QSPI_Write((uint8_t *)C6, music_addr, 42) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music_addr += 42;
+  }
 
+/////222////
+
+ ///222///
+  for(int i = 0; i < 78; i++){
+	  if(BSP_QSPI_Write((uint8_t *)G6, music2_addr, 28) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music2_addr += 28;
+  }
+  for(int i = 0; i < 88; i++){
+	  if(BSP_QSPI_Write((uint8_t *)A6, music2_addr, 25) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music2_addr += 25;
+  }
+  for(int i = 0; i < 49; i++){
+	  if(BSP_QSPI_Write((uint8_t *)B5, music2_addr, 45) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music2_addr += 45;
+  }
+  for(int i = 0; i < 49; i++){
+	  if(BSP_QSPI_Write((uint8_t *)B5, music2_addr, 45) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music2_addr += 45;
+  }
+  for(int i = 0; i < 52; i++){//22050 = 5*4096+6*256+2*16+2 = 0x005622;
+	  if(BSP_QSPI_Write((uint8_t *)C6, music2_addr, 42) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music2_addr += 42;
+  }
+  for(int i = 0; i < 52; i++){//22050 = 5*4096+6*256+2*16+2 = 0x005622;
+	  if(BSP_QSPI_Write((uint8_t *)C6, music2_addr, 42) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music2_addr += 42;
+  }
+  for(int i = 0; i < 49; i++){
+	  if(BSP_QSPI_Write((uint8_t *)B5, music2_addr, 45) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music2_addr += 45;
+  }
+  for(int i = 0; i < 49; i++){
+	  if(BSP_QSPI_Write((uint8_t *)B5, music2_addr, 45) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music2_addr += 45;
+  }
+  for(int i = 0; i < 88; i++){
+	  if(BSP_QSPI_Write((uint8_t *)A6, music2_addr, 25) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music2_addr += 25;
+  }
+  for(int i = 0; i < 100; i++){
+	  if(BSP_QSPI_Write((uint8_t *)B6, music2_addr, 22) != QSPI_OK){
+		  Error_Handler();
+	  }
+	  music2_addr += 22;
+  }
   //Read the data
-  if(BSP_QSPI_Read((uint8_t *)play, 0x00000000, 22050) != QSPI_OK){
+  if(BSP_QSPI_Read((uint8_t *)play, 0x030000, 22050) != QSPI_OK){
 	  Error_Handler();
   }
   HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
@@ -867,6 +995,12 @@ void control(void){
 								isPause = 1;
 								printPause();
 								HAL_Delay(500);
+								  if(BSP_QSPI_Read((uint8_t *)play, 0x050000, 22050) != QSPI_OK){
+									  Error_Handler();
+								  }
+							 	HAL_DAC_Start_DMA(&hdac1, DAC_CHANNEL_1, play, 22050, DAC_ALIGN_8B_R);
+
+
 							}
 				else if(isPause==1){
 					isDelaying = 0;
